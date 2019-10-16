@@ -5,27 +5,14 @@
 % basal_tree: basal dendrites part of intree;
 
 function varargout=define_apical(intr)
-    eucl=eucl_tree(intr);
-    [~,max_ind]=max(eucl);
-    ipar=ipar_tree(intr);
-    path=ipar(max_ind,:);
-    path=path(path~=0);
-    apical_begin=path(end-30); %先从root外30作为临时root 避免引入多余的basal dendrites
-    
-    path_append=ipar(apical_begin,:);path_append=path_append(path_append~=0);
-    branch_pns=find(B_tree(intr));
-    [~,apical_begin_ind]=intersect(path_append,branch_pns);
-    if apical_begin_ind(end)==1
-        apical_begin=path_append(apical_begin_ind(end-1)-1);
-    else
-        apical_begin=path_append(apical_begin_ind(end)-1); %寻找真正的apical的root
-    end
-    
-    [subind,apicaltr]=sub_tree(intr,apical_begin);
-    intr.R=ones([length(subind),1])*2;
-    intr.R(logical(subind))=1;
-    intr.R(path(end))=0;
-    intr.rnames={'soma','apical','basal'};
+    rooted=find_root(intr);
+    rind=rindex_tree(rooted);
+    begins=find(rind==1);
+    beginR=rooted.R(begins);
+    apical_begin=begins(beginR==1);
+    basal_begin=begins(beginR==2); % begins include apical_begin & basal_begin
+    [subind,apicaltr]=sub_tree(rooted,apical_begin);
+    intr.rnames={'apical','basal'};
     
     varargout{1}=intr;
     if nargout==2
