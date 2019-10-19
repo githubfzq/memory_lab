@@ -54,7 +54,16 @@ for vFilamentsIndex=0:vCount-1
     for lb=1:length(labelgroup)
         segLabelInd=find(segLabels==labelgroup(lb));
         segPoints=unique(vFilamentsEdges(segLabelInd,:));
-        vFilamentsTypes(segPoints+1,1)=lb;
+        if labelgroup(lb)=="apical"
+            vFilamentsTypes(segPoints+1,1)=4;
+        elseif labelgroup(lb)=="basal"
+            vFilamentsTypes(segPoints+1,1)=3;
+        else
+            vFilamentsTypes(segPoints+1,1)=0;
+        end
+        beginVertex=vFilaments.GetBeginningVertexIndex(vFilamentsIndex);
+        vFilamentsTypes(beginVertex+1)=1;
+        % 0 - undefined, 1 - soma, 3 - basal dendrite, 4 - apical dendrite
     end
     
     N=size(vFilamentsXYZ,1);
