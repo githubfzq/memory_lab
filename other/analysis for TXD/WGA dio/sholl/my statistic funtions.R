@@ -9,7 +9,7 @@ require(rlang)
 # load data frame, do normal test, var-test, t-test and wilcox rank test, and return test p-value
 # data frame. 
 # formula_str: y~f(X) [x=x1,x2,...] group by "group_var"
-# if compute_cummulative is TRUE, formula is Y=¡Æf(group_var)~X group by "group var"
+# if compute_cummulative is TRUE, formula is Y=âˆ‘f(group_var)~X group by "group var"
 # sample_var: the variable which compute errorbar
 group_test<-function(data,group_var,formula_str,test_method="auto",plot_type="point",
                      plot_data=NULL){
@@ -254,7 +254,7 @@ stat_signif_data<-function(result_tb,ref_tb,group_var,line_orient="horizontal",
             term_group<-.[["term"]] %>% str_split(':',simplify = T) %>% as_tibble()
             dplyr::mutate(.,comparison_key=if_else(V2==V4,term_group$V1,term_group$V2))
           } %>% dplyr::mutate(comparison_value=if_else(V2==V4,V2,V3)) %>% 
-            spread(comparison_key,comparison_value) %>% nest(c(comparison,V2:V5)) %>%
+            spread(comparison_key,comparison_value) %>% nest(cols=c(comparison,V2:V5)) %>%
           mutate_at("data",map,creat_vertical_line) %>% rowid_to_column(var = "line_id") %>%
           dplyr::mutate(signif_txt=p_to_signif(adj.p.value))
     }
@@ -262,7 +262,7 @@ stat_signif_data<-function(result_tb,ref_tb,group_var,line_orient="horizontal",
       signif_tb<-result_tb %>% .[["comparison"]] %>% 
         str_match("([A-Za-z+-]+)-([A-Za-z+-]+)") %>%
         as_tibble() %>% inner_join(result_tb,.,by=c("comparison"="V1")) %>%
-        nest(c(comparison,V2:V3)) %>% mutate_at("data",map,creat_vertical_line) %>% 
+        nest(cols=c(comparison,V2:V3)) %>% mutate_at("data",map,creat_vertical_line) %>% 
         rowid_to_column(var = "line_id") %>%
         dplyr::mutate(signif_txt=p_to_signif(adj.p.value))
     signif_level<-signif_tb %>% 
@@ -294,7 +294,7 @@ stat_signif_data<-function(result_tb,ref_tb,group_var,line_orient="horizontal",
       signif_tb<-signif_tb %>%
           dplyr::mutate(xmin=1:nrow(.)-.2,xmax=1:nrow(.)+.2) %>%
           left_join(result_tb,by=group_var) %>% mutate_if(is.factor,as.character) %>%
-          nest(y:xmax,.key = "pos") %>% mutate_at("pos",funs(map(.,creat_signif_line))) %>% 
+          nest(cols=y:xmax,.key = "pos") %>% mutate_at("pos",funs(map(.,creat_signif_line))) %>% 
           rowid_to_column(var = "line_id") %>% 
           dplyr::mutate(signif_txt=p_to_signif(p.value)) %>% unnest()
       signif_level_tb<-signif_tb %>% nest(x,y) %>% 

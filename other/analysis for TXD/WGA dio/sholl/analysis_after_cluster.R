@@ -47,7 +47,8 @@ data.sholl<-get("sholl.data.fill",envir = ev2) %>% as_tibble() %>%
   filter(!is.na(cluster_complete))
 data.sholl_normed<-get("sholl.normalized.data",envir = ev2) %>% as_tibble() %>%
   mutate_if(is.factor,as.character) %>% left_join(data.cluster,by=c(id=".id",group="treat")) %>%
-  filter(!is.na(cluster_complete)) %>% {
+  filter(!is.na(cluster_complete))
+data.sholl_normed<-data.sholl_normed %>% {
     dat<-.
     select_at(.,c(3,4,6,7)) %>% unique() %>% {
       modl<-.
@@ -66,7 +67,7 @@ depth_volume_data<-get("DataAll",envir = ev1) %>% .[[15]] %>% as_tibble() %>%
 depth_data<-depth_length_data %>% full_join(depth_area_data,by=names(.)[-2]) %>%
   full_join(depth_volume_data,by=names(.)[c(-2,-7)]) %>%
   rename_at(c(2,4,6:8),~c("Length","label","group","Area","Volume")) %>%
-  group_by_at(vars(1,3:4,6)) %>% summarise_at(vars(2,7:8),sum) %>% ungroup() %>%
+  group_by_at(vars(1,3:4,6)) %>% summarise_at(vars("Length","Area","Volume"),sum) %>% ungroup() %>%
   mutate_if(is.factor,as.character) %>% universe_neuron_id() %>%
   left_join(data.cluster,by=".id") %>%
   filter(!is.na(cluster_complete))
@@ -98,7 +99,7 @@ res.volume.clustered<-data.volume.clustered %>% nest_cluster_compares() %>%
 
 # Sholl analysis with absolute radius
 
-data.sholl.clustered<-data.sholl %>% mutate(subgroup=paste0(group,":cluster_",cluster_complete))
+data.sholl.clustered<-data.sholl %>% mutate(subgroup=paste0(group,"_cluster_",cluster_complete))
 compute.cum.nolabel<-. %>% group_by_at(c("id","group","radius")) %>% 
   summarise_at("intersections",sum) %>% 
   cut_gruop_test("radius",30,"intersections~group",compute_cummulative = T,
@@ -200,7 +201,7 @@ add_clust_fig_titles<-function(figs) {
 }
 stitch_figs<-function(figs){
   lay1<-lay_new(matrix(1))
-  lay2<-lay_new(matrix(1:4,nrow = 2,byrow = T))
+  lay2<-lay_new(matrix(1:3,nrow = 2,byrow = T))
   lay3<-lay_bind_col(lay1,lay2,widths = c(2,3))
   lay4<-lay_new(matrix(1:3),heights = c(1,3,1))
   lay5<-lay_split_field(lay3,lay4,1)
@@ -231,14 +232,19 @@ shift_signif_y<-function(fig,delta_y){
 }
 figs.length<-c(list(res.length),res.length.clustered$result) %>% transpose() %>% {.$figure}
 modify_length_figs<-function(fig) fig+scale_fill_manual(values = selected_color,name=NULL)+
-  scale_color_manual(values = selected_color,name=NULL,labels=c('Near','MD-projecting neuron'))+
+  scale_color_manual(values = selected_color,name=NULL,
+                     labels=c('non-MD-projecting neuron','MD-projecting neuron'))+
   ylab("Dendrite length (mm)")+xlab(NULL)+
-  scale_x_discrete(labels=c("Apical","Basal","Total")) # 2019-1-19 change legend labels
+  scale_x_discrete(labels=c("Apical","Basal","Total")) # 2019-1-29 change legend labels
 figs.length<-figs.length %>% map(modify_length_figs)
 shift_signif_y(figs.length[[1]],0.5) # 2019-1-17 
-figs.length[[1]]<-figs.length[[1]]+theme(legend.position=c(0.35,0.9),
+figs.length[[1]]<-figs.length[[1]]+theme(legend.position=c(0.38,0.9),
                                          axis.title.y = element_text(margin = margin(r = 5)),
                                          axis.text.x = element_text(margin = margin(t=5)))
+# ggsave("length.png",figs.length[[1]],width=40,height=30,units = "mm",dpi=600,scale=2)
+# ggsave("length.jpg",figs.length[[1]],width=40,height=30,units = "mm",dpi=600,scale=2)
+# ggsave("length.pdf",figs.length[[1]],width=40,height=30,units = "mm",dpi=600,scale=2)
+
 figs.length.titled<-add_clust_fig_titles(figs.length)
 figs.length.overview<-stitch_figs(figs.length)
 figs.length.titled.overview<-stitch_figs(figs.length.titled)
@@ -246,7 +252,7 @@ figs.length.titled.overview<-stitch_figs(figs.length.titled)
 figs.area<-c(list(res.area),res.area.clustered$result) %>% transpose() %>% {.$figure}
 modify_area_figs<-function(fig) fig+scale_fill_manual(values = selected_color,name=NULL)+
   scale_color_manual(values = selected_color,name=NULL)+
-  ylab(expression(paste("Dendrite area (¡Á",10^3,mu,m^2,")")))+xlab(NULL)+
+  ylab(expression(paste("Dendrite area (Ã—",10^3,mu,m^2,")")))+xlab(NULL)+
   scale_x_discrete(labels=c("Apical","Basal","Total"))+
   scale_y_continuous(breaks = function(x) seq(0,x[2],10))
 figs.area<-figs.area %>% map(modify_area_figs)
@@ -261,7 +267,7 @@ figs.area.titled<-stitch_figs(figs.area.titled)
 figs.volume<-c(list(res.volume),res.volume.clustered$result) %>% transpose() %>% {.$figure}
 modify_volume_figs<-function(fig) fig+scale_fill_manual(values = selected_color,name=NULL)+
   scale_color_manual(values = selected_color,name=NULL)+
-  ylab(expression(paste("Dendrite volume (¡Á",10^3,mu,m^3,")")))+xlab(NULL)+
+  ylab(expression(paste("Dendrite volume (Ã—",10^3,mu,m^3,")")))+xlab(NULL)+
   scale_x_discrete(labels=c("Apical","Basal","Total"))+
   scale_y_continuous(breaks = function(x) seq(0,x[2],10),expand = expand_scale(mult = c(0.05,0)))
 figs.volume<-figs.volume %>% map(modify_volume_figs)
@@ -308,7 +314,7 @@ adjust_text_repel<-function(fig,lim){
   fig1<-fig %>% remove_geom("GeomTextRepel")
   fig1+geom_text_repel(aes(x=x,y=y,label=signif_txt),text_data,xlim = lim)
 }
-figs.sholl_cum_label<-c(list(res.cum.label),res.cum.label.clustered$result) %>%
+figs.sholl_cum_label<-c(list(res.num.label),res.cum.label.clustered$result) %>%
   transpose() %>% {.[4:6]}
 figs.sholl_cum_label<-map(figs.sholl_cum_label,map,
                           ~modify_sholl_cum_figs(.)+guides(linetype="none")+theme(strip.background = element_blank()))
@@ -367,7 +373,7 @@ signif_point_to_region2<-function(fig,threshod_r){
   if(nrow(dat_line_star)){
     dat_line_star %<>% group_by(PANEL) %>%
       dplyr::mutate(seg=cut_segment(x)) %>% group_by(PANEL,seg) %>%
-      dplyr::summarise(start=range(x)[1],end=range(x)[2],mid=(start+end)/2) %>% ungroup() %>% 
+      dplyr::summarise(start=range(x)[1],env=range(x)[2],mid=(start+end)/2) %>% ungroup() %>% 
       dplyr::mutate(label=c('apical','basal')[PANEL])
     remove_geom(fig,"GeomText")+
       geom_segment(aes(x=start,xend=end,group=label),dat_line_star,y=-0.5,yend=-0.5)+
@@ -395,8 +401,7 @@ figs.sholl_label.titled.overview<-stitch_figs(figs.sholl_label.titled)
 figs.sholl_label[[1]]<-figs.sholl_label[[1]] %+% 
   {figs.sholl_label[[1]]$data %>% dplyr::filter(mu!=0)} %+% 
   facet_grid(.~label,scales = "free",labeller = as_labeller(first_letter_to_upper))+
-  theme(legend.position = "none") # 2019-1-17 remove legend
-figs.sholl_label[[1]] %<>% put_signif_upside() %>% remove_fill_legend()
+  theme(legend.position = "none") # 2019-1-17 remove legend figs.sholl_label[[1]] %<>% put_signif_upside() %>% remove_fill_legend()
 
 modify_norm_cum_figs<-function(fig) adjust_max_y_tick(fig)+
   scale_fill_manual(values = selected_color,name=NULL)+
@@ -480,7 +485,7 @@ signif_point_to_region4<-function(fig,threshod_r){
   else
     fig+facet_grid(.~label,labeller = as_labeller(first_letter_to_upper))
 }
-put_signif_upside2<-function(fig,y_manul=7.5){
+put_signif_upside2<-function(fig,y_manul=7.2){
   fig$layers[[3]]$aes_params$y<-y_manul
   fig$layers[[3]]$aes_params$yend<-y_manul
   fig$layers[[4]]$aes_params$y<-y_manul+0.2
@@ -586,7 +591,7 @@ export_required_images<-function(){
               c(40,30),
               c(40,30),
               c(40,40),
-              c(40,40),
+              c(40,30),
               c(45,35),
               c(45,35),
               c(40,35),
