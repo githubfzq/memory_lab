@@ -84,3 +84,18 @@ for n=1:10
 end
 
 save morpho_data.mat
+%% 2019-12-4
+
+% repair soma point is not root (for python import)
+load morpho_data.mat
+for n=1:10
+    if ~is_soma_root(tr(n))
+        tr(n)=redirect_to_soma(tr(n));
+    end
+    if ~isSubtreeUniform(tr(n))
+        tr(n)=find_new_soma(tr(n));
+    end
+    tr(n)=sort_tree(tr(n));
+    exportSwc(tr(n),[tr(n).name,'.swc']);
+end
+save morpho_data.mat
