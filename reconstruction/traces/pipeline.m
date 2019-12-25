@@ -99,3 +99,28 @@ for n=1:10
     exportSwc(tr(n),[tr(n).name,'.swc']);
 end
 save morpho_data.mat
+
+%% 2019-12-24
+
+load morpho_data.mat
+
+imaris_filament_to_swc('20191224_neuron1.swc');
+imaris_filament_to_swc('20191224_neuron2.swc');
+imaris_filament_to_swc('20191224_neuron3.swc');
+imaris_filament_to_swc('20191224_neuron4.swc');
+imaris_filament_to_swc('20191224_neuron5.swc');
+
+swcToday=ls('20191224_*.swc');
+for n=11:15
+    tr(n)=load_tree(swcToday(n-10,:));
+    if ~is_soma_root(tr(n))
+        tr(n)=redirect_to_soma(tr(n));
+    end
+    if ~isSubtreeUniform(tr(n))
+        tr(n)=find_new_soma(tr(n));
+    end
+    tr(n)=sort_tree(tr(n));
+    exportSwc(tr(n),[tr(n).name,'.swc']);
+end
+
+save morpho_data.mat
