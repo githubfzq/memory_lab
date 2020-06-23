@@ -18,7 +18,7 @@ from analysis_functions import (
     get_cellID_info,
     fillna_unique
 )
-from plot_helper import add_scalebar
+from plot_helper import add_scalebar, get_aspect_scale, to_save_figure
 
 
 class electro_base(object):
@@ -115,7 +115,7 @@ class epsc_parser(electro_base):
         axin.spines["top"].set_visible(False)
         axin.spines["right"].set_visible(False)
         if to_save:
-            plt.savefig(to_save, dpi=600)
+            to_save_figure(to_save)
 
     def read_demo_stat_data(self, item, file_id):
         """item : String: 'iti' or 'amp'. Read iti stat data or amplitute stat data.
@@ -160,11 +160,14 @@ class ap_parser(electro_base):
                 self.files[item].remove(self.__title_file[item])
                 self.__title[item] = self.__readTitle(item)
     
-    def plot_demo_ap(self, file_id=None, to_save="", sweep="all", cell_id=None, fig_size=(3,3)):
+    def plot_demo_ap(self, file_id=None, to_save="", sweep="all", cell_id=None, fig_size=(3,3), aspect_ratio=150, sweepYcolor='C0',
+                    sweepCcolor='C0'):
         """plot AP demo trace from a file.
         file_id: Interger. The n-th file in root_path.
         to_save: String. The figure to be saved. Default: empty (not to save).
         sweep: String or interger. The n-th sweep to be plotted. 
+        aspect_ratio: y-axis scale ratio of voltage and current.
+        sweepYcolor, sweepCcolor: the color of sweepY axes and sweepC axes.
         Default: 'all', all sweeps will be plotted."""
         if cell_id is not None:
             file_id = self.get_file_id(cell_id)
@@ -175,21 +178,26 @@ class ap_parser(electro_base):
         if sweep == "all":
             for sweep in demo.sweepList:
                 demo.setSweep(sweep)
-                ax1.plot(demo.sweepX[500:5500], demo.sweepY[500:5500], "C0")
-                ax2.plot(demo.sweepX[500:5500], demo.sweepC[500:5500], "C1")
-            add_scalebar(ax2, (.1, .2), ('s', 'pA'), fig)
+                ax1.plot(demo.sweepX[500:5500], demo.sweepY[500:5500], sweepYcolor)
+                ax2.plot(demo.sweepX[500:5500], demo.sweepC[500:5500], sweepCcolor)
         else:
             if not isinstance(sweep,int):
                 sweep = int(sweep)
             demo.setSweep(sweep-1)
-            ax1.plot(demo.sweepX[500:5500], demo.sweepY[500:5500], "C0")
-            ax2.plot(demo.sweepX[500:5500], demo.sweepC[500:5500], "C1")
-            add_scalebar(ax2, (.1, .1), ('s', 'pA'), fig)
+            ax1.plot(demo.sweepX[500:5500], demo.sweepY[500:5500], sweepYcolor)
+            ax2.plot(demo.sweepX[500:5500], demo.sweepC[500:5500], sweepCcolor)
+        asp1=get_aspect_scale(ax1)
+        ax2.set_aspect(asp1[1]*aspect_ratio/asp1[0])
+        add_scalebar(
+            ax2, (.1, .2), ('s', 'nA'), fig, 
+            y_label='200pA/\n30mV')
         ax1.axis("off")
         ax2.axis("off")
-        plt.tight_layout()
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            plt.tight_layout()
         if bool(to_save):
-            plt.savefig(to_save, dpi=600)
+            to_save_figure(to_save)
 
     def __readTitle(self, item):
         "read fit/event demo csv title"
@@ -427,7 +435,7 @@ class ap_parser(electro_base):
         plt.title(identifier)
         plt.ylabel("AP number")
         if bool(to_save):
-            plt.savefig(term + " distribution of " + to_save, dpi=600)
+            to_save_figure(term + " distribution of " + to_save)
 
     def get_tau_stat(self):
         """Return a dataframe computed from get_all_data('tau'), exclude outliers"""
@@ -444,7 +452,7 @@ class ap_parser(electro_base):
         plt.xlabel("Time constant (ms)")
         plt.ylabel("Number of neuron")
         if bool(to_save):
-            plt.save(to_save, dpi=600)
+            to_save_figure(to_save)
 
     def check_abf_valid(self, file_id=0, file=""):
         """Check if the n-th abf file has normal data organized"""
@@ -468,8 +476,10 @@ class ramp_parser(electro_base):
             self.path_root["abf"] = "../../Ramp"
             self.files["abf"], _ = getAllFiles(self.path_root["abf"])
 
-    def plot_demo_ramp(self, file_id=0, cell_id=None, sweep='all', fig_size=(3,3), to_save=""):
-        """Plot voltage reaction to ramp current."""
+    def plot_demo_ramp(self, file_id=0, cell_id=None, sweep='all', fig_size=(3,3), to_save="", aspect_ratio=150, 
+                       sweepYcolor='C0', sweepCcolor='C0'):
+        """Plot voltage reaction to ramp current.
+        parameters: see `ap_parser().plot_demo_ap()`."""
         if cell_id is not None:
             file_id = self.get_file_id(cell_id)
         fig = plt.figure(figsize=fig_size)
@@ -479,19 +489,22 @@ class ramp_parser(electro_base):
         if sweep=='all':
             for sweep in abf.sweepList:
                 abf.setSweep(sweep)
-                ax1.plot(abf.sweepX, abf.sweepY)
-                ax2.plot(abf.sweepX, abf.sweepC)
+                ax1.plot(abf.sweepX, abf.sweepY, sweepYcolor)
+                ax2.plot(abf.sweepX, abf.sweepC, sweepCcolor)
         else:
             abf.setSweep(sweep - 1)
-            ax1.plot(abf.sweepX, abf.sweepY)
-            ax2.plot(abf.sweepX, abf.sweepC)
+            ax1.plot(abf.sweepX, abf.sweepY, sweepYcolor)
+            ax2.plot(abf.sweepX, abf.sweepC, sweepCcolor)
+        asp1=get_aspect_scale(ax1)
+        ax2.set_aspect(asp1[1]*aspect_ratio/asp1[0])
         ax1.axis("off")
         ax2.axis("off")
-#         add_scalebar(ax1, (1,1), ('s','mV'), fig)
-        add_scalebar(ax2, (1,0.1),('s','pA'), fig)
-        plt.tight_layout()
+        add_scalebar(ax2, (1,0.2),('s','pA'), fig, y_label='200pA/\n30mV')
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            plt.tight_layout()
         if bool(to_save):
-            plt.savefig(to_save, dpi=600)
+            to_save_figure(to_save)
 
     def get_threshold_current(self):
         """Get the threshold current to initialize AP for all neurons.
@@ -762,7 +775,7 @@ def plot_iv_traces(IVdata, to_save=""):
     plt.xlabel("I (nA)")
     plt.ylabel("Vm (mV)")
     if bool(to_save):
-        plt.savefig(to_save, dpi=600)
+        to_save_figure(to_save=to_save)
 
 
 def compute_Rm(IVdata):
@@ -795,7 +808,7 @@ def plot_Rm_distribution(Rm_data, to_save=""):
     plt.xlabel(r"$Rm\ (M\Omega)$")
     plt.ylabel("Number of neuron")
     if bool(to_save):
-        plt.savefig(to_save, dpi=600)
+        to_save_figure(to_save)
 
 
 def extract_demo_epsc_features(file, features):

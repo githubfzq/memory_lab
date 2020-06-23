@@ -4,16 +4,17 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatch
+from mpl_toolkits.mplot3d import Axes3D
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
 from sklearn.svm import LinearSVC
 from sklearn.pipeline import make_pipeline
-from scipy.stats import normaltest, f, ttest_ind, kruskal, sem
+from scipy.stats import normaltest, f, ttest_ind, ranksums, sem
 from morphological_functions import morpho_parser
 from patch_clamp_functions import electro_parser
 from analysis_functions import merge_dicts, fillna_unique, zero_padding
-from plot_helper import plot_signif_marker
+from plot_helper import plot_signif_marker, to_save_figure
 
 
 class cluster_processor(electro_parser, morpho_parser):
@@ -127,7 +128,7 @@ class cluster_processor(electro_parser, morpho_parser):
         plt.xlabel(item1)
         plt.ylabel(item2)
         if bool(to_save):
-            plt.savefig(to_save, dpi=600)
+            to_save_figure(to_save)
 
     def plot_decomposition_scatter(
         self, ca_dat=None, dim1=0, dim2=1, to_save="", plot_3d=False, fig_size=(3,3), show_legend=True,
@@ -147,7 +148,7 @@ class cluster_processor(electro_parser, morpho_parser):
         if label_map is None:
             label_map={clust:'cluster {}'.format(clust + 1) for clust in np.sort(ca_dat.cluster.unique())}
         if plot_3d:
-            ax = fig.add_subplot(111, projection="3d")
+            ax = Axes3D(fig)
             ax.view_init(30,30)
             dim1, dim2, dim3 = (0, 1, 2)
             for clust in np.sort(ca_dat.cluster.unique()):
@@ -159,6 +160,7 @@ class cluster_processor(electro_parser, morpho_parser):
                     color=next(_color),
                     label=label_map[clust],
                 )
+            ax.dist = 12 # avoid labels incomplete
             ax.legend()
             ax.set_xlabel("Component {}".format(dim1 + 1))
             ax.set_ylabel("Component {}".format(dim2 + 1))
@@ -180,7 +182,7 @@ class cluster_processor(electro_parser, morpho_parser):
             ax.set_ylabel("Component {}".format(dim2 + 1))
             plt.tight_layout()
         if bool(to_save):
-            plt.savefig(to_save, dpi=600, bbox_inches='tight')
+            to_save_figure(to_save)
 
     def stat_analyse(
         self, tab, group_variable="cluster", return_valid_variable=True, **kwargs
@@ -262,8 +264,11 @@ def stat_analyse(tab, compare_variable, group_variable="cluster", group1=0, grou
         else:
             _, resultp = ttest_ind(dat1, dat2, equal_var=False, nan_policy="omit")
     elif (dat1_notna_ind.size > 20 and dat2_notna_ind.size > 20 and not test_small_sample) or (test_small_sample):
-        stat_method = "Kruskal-Wallis H-test"
-        _, resultp = kruskal(dat1, dat2, nan_policy="omit")
+        stat_method = "Wilcoxon rank-sum test"
+        dat1 = dat1[dat1_notna_ind]
+        dat2 = dat2[dat2_notna_ind]
+        res = ranksums(dat1, dat2)
+        resultp = res.pvalue
     else:
         stat_method = "None"
         resultp = 1
@@ -357,9 +362,11 @@ def plot_cluster_hist(
         xlabel = col
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    if bool(to_save):
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
         plt.tight_layout()
-        plt.savefig(to_save, dpi=600)
+    if bool(to_save):
+        to_save_figure(to_save)
 
 
 def select_demo_cell_id(tab, feature, clusters=(0,1)):
@@ -410,7 +417,7 @@ def plot_cluster_stat(tab, feature, clusters=(0,1), fig_size=(2.5,2), xticks=Non
     plt.ylabel(ylabel)
     plt.tight_layout()
     if bool(to_save):
-        plt.savefig(to_save, dpi=600)
+        to_save_figure(to_save)
     
 def plot_cumulative_curve(tab, feature, clusters=(0,1), n_bins=50, ax=None,fig_size=(3,3), to_save="", **kwargs):
     """Plot cumulative density distribution curve."""
@@ -422,7 +429,7 @@ def plot_cumulative_curve(tab, feature, clusters=(0,1), n_bins=50, ax=None,fig_s
     ax.hist(x1, n_bins, cumulative=True, histtype='step', range=range_, density=True)
     ax.hist(x2, n_bins, cumulative=True, histtype='step', range=range_, density=True)
     if bool(to_save):
-        plt.savefig(to_save,dpi=600,bbox_inches='tight')
+        to_save_figure(to_save)
 
     
 def plot_cluster_sholl(
@@ -493,4 +500,4 @@ def plot_cluster_sholl(
             (label_map[clusters[0]], label_map[clusters[1]])
         )
         if bool(to_save):
-            plt.savefig(to_save, dpi=600, bbox_inches='tight')
+            to_save_figure(to_save)

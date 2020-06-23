@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import pyplot as plt
 from matplotlib import transforms
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
 
@@ -26,10 +27,11 @@ def get_aspect_scale(ax):
     return result
 
 
-def add_scalebar(ax, num, unit, fig, bbox_to_anchor=[0,0,1,1]):
+def add_scalebar(ax, num, unit, fig, bbox_to_anchor=[0,0,1,1], x_label=None, y_label=None):
     """Add scalebar to axes `ax`.
     num: number or tuple (number, number). Scalebar length.
-    unit: String, or (Sring, string)"""
+    unit: String, or (Sring, string).
+    x_label, y_label: set defined x-label(y-label). Default: num+unit."""
     if isinstance(num, tuple):
         num_x, num_y = num[0], num[1]
     else:
@@ -38,6 +40,8 @@ def add_scalebar(ax, num, unit, fig, bbox_to_anchor=[0,0,1,1]):
         unit_x, unit_y = unit[0], unit[1]
     else:
         unit_x, unit_y = unit, unit
+    x_label = str(num_x)+unit_x if x_label is None else x_label
+    y_label = str(num_y)+unit_y if y_label is None else y_label
     axin = zoomed_inset_axes(
         ax,
         num_x,
@@ -45,8 +49,8 @@ def add_scalebar(ax, num, unit, fig, bbox_to_anchor=[0,0,1,1]):
         bbox_to_anchor=bbox_to_anchor,
         bbox_transform=fig.transFigure,
         axes_kwargs={
-            "xlabel": str(num_x)+unit_x,
-            "ylabel": str(num_y)+unit_y,
+            "xlabel": x_label,
+            "ylabel": y_label,
             "xticks": [],
             "yticks": [],
         },
@@ -55,6 +59,7 @@ def add_scalebar(ax, num, unit, fig, bbox_to_anchor=[0,0,1,1]):
     axin.yaxis.set_label_position("right")
     axin.spines["top"].set_visible(False)
     axin.spines["left"].set_visible(False)
+    axin.spines["right"].set_visible(True)
     axin.patch.set_alpha(0)
 
 
@@ -206,3 +211,11 @@ def get_max_ratio_sum_compact(ratio):
 def plot_signif_marker(prop):
     """Plot significant marker.
     prop: boxplot component returned by `pyplot.boxplot()`."""
+
+def to_save_figure(to_save, formats=['png','eps']):
+    """Save figure to file.
+    to_save: String. Filename of figure file to save.
+    formats: List. The format of figure, each saved as a file.
+    """
+    for fmt in formats:
+        plt.savefig(to_save+'.'+fmt, dpi=600, transparent=True, bbox_inches='tight')
