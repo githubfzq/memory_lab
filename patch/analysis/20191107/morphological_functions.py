@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import sem
 from matplotlib import pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.collections import PatchCollection
 import neurom as nm
 from neurom.view import view
 from plot_helper import plot_unified_scale_grid, add_scalebar, to_save_figure
@@ -396,3 +398,50 @@ def apical_upside(neuron):
         return roted
     else:
         return traned
+
+def plot_sholl_demo(neuron, step_size=30, label_dict=None, to_save=""):
+    """Plot sholl analysis demo figure.
+    Display the apical and basal part of a neuron, and concentric circles of sholl analysis.
+    Args:
+    - neuron: [neurom.fst._core.FstNeuron], a neuron object.
+    - step_size: [int], the interval radius of the concentric circles.
+    - label_dict: [dict], a dictionary indicate the position of label.
+        the keys of dict are the label name, and the values are the (x, y) position.
+        Default: {'Apical': (x1, y1), 'Basal': (x2, y2)}, where (x1,y1) and (x2,y2) are computed automatically.
+    """
+    neuron = apical_upside(neuron)
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1, aspect='equal')
+    view.plot_neuron(ax, neuron)
+
+    # draw circles
+    center = neuron.soma.center[:2]
+    _dist = np.linalg.norm(neuron.points[:,:2]-center, axis=1).max()
+    radii = np.arange(step_size, _dist, step_size)
+    patches = []
+    for rad in radii:
+        circle = mpatches.Circle(center, rad, fill=False, edgecolor='dimgray')
+        patches.append(circle)
+    p = PatchCollection(patches, match_original=True)
+    ax.add_collection(p)
+
+    # add labels
+    if label_dict is None:
+        apical_points = np.concatenate([x.points for x in nm.iter_neurites(neuron, filt=lambda t: t.type==nm.APICAL_DENDRITE)])
+        apical_label_pos_xs = [apical_points[:,0].min()-center[0], apical_points[:,0].max()-center[0]]
+        apical_label_pos_x = apical_label_pos_xs[0] if np.abs(apical_label_pos_xs[0])>np.abs(apical_label_pos_xs[1]) else apical_label_pos_xs[1]
+        apical_label_pos_y = center[1]+(apical_points[:,1].max()-center[1])/2
+        basal_points = np.concatenate([x.points for x in nm.iter_neurites(neuron, filt=lambda t: t.type==nm.BASAL_DENDRITE)])
+        basal_label_pos_xs = [basal_points[:,0].min()-center[0],basal_points[:,0].max()-center[0]]
+        basal_label_pos_x = basal_label_pos_xs[0] if np.abs(basal_label_pos_xs[0])>np.abs(basal_label_pos_xs[1]) else basal_label_pos_xs[1]
+        basal_label_pos_y = center[1]+(basal_points[:,1].min()-center[1])/2
+        label_dict = {'Apical':(apical_label_pos_x, apical_label_pos_y), 'Basal': (basal_label_pos_x, basal_label_pos_y)}
+
+    for name,pos in label_dict.items():
+        plt.annotate(name, pos)
+
+    ax.autoscale()
+    ax.set_axis_off()
+    plt.title(None)
+    if bool(to_save):
+        to_save_figure(to_save)

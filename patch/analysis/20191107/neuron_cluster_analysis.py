@@ -5,6 +5,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatch
 from mpl_toolkits.mplot3d import Axes3D
+from brokenaxes import brokenaxes
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
 from sklearn.decomposition import PCA
@@ -165,6 +166,8 @@ class cluster_processor(electro_parser, morpho_parser):
             ax.set_xlabel("Component {}".format(dim1 + 1))
             ax.set_ylabel("Component {}".format(dim2 + 1))
             ax.set_zlabel("Component {}".format(dim3 + 1))
+            plt.yticks(rotation=30,horizontalalignment='center',
+                        verticalalignment='baseline',rotation_mode='anchor')
             plt.tight_layout()
         else:
             ax = fig.add_subplot(1, 1, 1)
@@ -388,7 +391,8 @@ def select_demo_cell_id(tab, feature, clusters=(0,1)):
     return {clusters[0]:res1, clusters[1]:res2} 
 
 def plot_cluster_stat(tab, feature, clusters=(0,1), fig_size=(2.5,2), xticks=None, capsize=8, plot_box=False, 
-                      ylabel=None, to_save="", signif=None,**kwargs):
+                      ylabel=None, to_save="", signif=None, 
+                      brokenaxes_dict=None, **kwargs):
     """Plot bar plot of feature for 2 clusters.
     Parameters:
     tab: DataFrame. Should contain columns {`feature`, 'cluster'}.
@@ -398,17 +402,23 @@ def plot_cluster_stat(tab, feature, clusters=(0,1), fig_size=(2.5,2), xticks=Non
     ylabel: ylabel.
     to_save: filename to save.
     signif: significant marker, default: None.
+    brokenaxes_dict: Dictionary. Parameters passed to `brokenaxes()`.
+                    If None, not draw broken axes. Default: None.
     **kwargs: other parameters passed to `matplotlib.pyplot.bar()` or `matplotlib.pyplot.boxplot()`."""
     plt.figure(figsize=fig_size)
+    if brokenaxes_dict is None:
+        ax = plt.gca()
+    else:
+        ax = brokenaxes(**brokenaxes_dict)
     if plot_box:
         x = [ind+1 for ind, _ in enumerate(clusters)]
         y = [tab[tab['cluster']==c][feature].dropna().values for c in clusters]
-        box_prop=plt.boxplot(y, **kwargs)
+        box_prop=ax.boxplot(y, **kwargs)
     else:
         x = [ind for ind, _ in enumerate(clusters)]
         y = [np.nanmean(tab[tab['cluster']==c][feature]) for c in clusters]
         err = [sem(tab[tab['cluster']==c][feature], nan_policy='omit') for c in clusters]
-        plt.bar(x, y, yerr=err, capsize=capsize, **kwargs)
+        ax.bar(x, y, yerr=err, capsize=capsize, **kwargs)
     if xticks is None:
         xticks = ['cluster {}'.format(c+1) for c in clusters]
     plt.xticks(x, xticks)
