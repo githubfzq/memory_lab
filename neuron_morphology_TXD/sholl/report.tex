@@ -1,0 +1,213 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={树突形态学分析报告},
+            pdfauthor={范祖权},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+  \title{树突形态学分析报告}
+  \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \author{范祖权}
+  \preauthor{\centering\large\emph}
+  \postauthor{\par}
+  \predate{\centering\large\emph}
+  \postdate{\par}
+  \date{2018年8月2日}
+
+
+\begin{document}
+\maketitle
+
+\subsection{原始数据}
+
+所有原始数据均为imaris软件自动导出的,文件保存路径在当前目录下的两个子文件夹中：
+
+\begin{verbatim}
+## [1] "./GFP"        "./GFP_nearby"
+\end{verbatim}
+
+每个文件夹下以神经元为单位，保存了GFP+或GFP-类的神经元形态数据。GFP+类神经元有16个样本，所以该层次下有16个子文件夹：
+
+\begin{verbatim}
+ [1] "./GFP/(GFP+)slice_1_red neuron1 statistics 20180720_Statistics"                  
+ [2] "./GFP/GFP+ slice_1 20180615 neuron1 statistics 20180720_Statistics_Statistics"   
+ [3] "./GFP/GFP+ slice_3 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [4] "./GFP/GFP+ slice_4 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [5] "./GFP/GFP+ slice_5 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [6] "./GFP/GFP+ slice_8 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [7] "./GFP/GFP+ slice_9 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [8] "./GFP/new_slice_1 20x 20180518 neuron1 statistics 20180720_Statistics_Statistics"
+ [9] "./GFP/new_slice_2 20x 20180518 neuron1 statistics 20180720_Statistics_Statistics"
+[10] "./GFP/new_slice_3 20x 20180518 neuron1 statistics 20180720_Statistics_Statistics"
+[11] "./GFP/slice_1_green neuron1 statistics 20180720_Statistics"                      
+[12] "./GFP/slice_1_green neuron3 statistics 20180720_Statistics_Statistics"           
+[13] "./GFP/slice_2_green neuron1 statistics 20180720_Statistics_Statistics"           
+[14] "./GFP/slice_2_green neuron3 statistics 20180720_Statistics_Statistics"           
+[15] "./GFP/slice_4_green neuron1 statistics 20180720_Statistics_Statistics"           
+[16] "./GFP/slice_4_green neuron2 statistics 20180720_Statistics_Statistics"           
+\end{verbatim}
+
+而GFP-类神经元有10个样本：
+
+\begin{verbatim}
+ [1] "./GFP_nearby/(GFP+ near)slice_2_red_1 neuron1 statistics 20180720_Statistics_Statistics"
+ [2] "./GFP_nearby/(GFP+ near)slice_3_red neuron1 statistics 20180720_Statistics_Statistics"  
+ [3] "./GFP_nearby/(GFP+ near)slice_4_red neuron1 statistics 20180720_Statistics_Statistics"  
+ [4] "./GFP_nearby/GFP- slice_1 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [5] "./GFP_nearby/GFP- slice_2 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [6] "./GFP_nearby/GFP- slice_6 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [7] "./GFP_nearby/GFP- slice_7 20180627 neuron1 statistics 20180720_Statistics_Statistics"   
+ [8] "./GFP_nearby/slice_1 20180611 neuron1 statistics 20180720_Statistics_Statistics"        
+ [9] "./GFP_nearby/slice_2_red neuron1 statistics 20180720_Statistics_Statistics"             
+[10] "./GFP_nearby/slice_5_red_2 neuron1 statistics 20180720_Statistics_Statistics"           
+\end{verbatim}
+
+以上每个文件夹中都含有45个csv文件，因为imaris软件对每个神经元进行了45个参数的测量。这些参数分别是：
+
+\begin{verbatim}
+ [1] "Dendrite_Area"                     
+ [2] "Dendrite_Branch_Depth"             
+ [3] "Dendrite_Branch_Level"             
+ [4] "Dendrite_Branching_Angle"          
+ [5] "Dendrite_Branching_Angle_B"        
+ [6] "Dendrite_Length"                   
+ [7] "Dendrite_Mean_Diameter"            
+ [8] "Dendrite_No._Spines"               
+ [9] "Dendrite_Orientation_Angle"        
+[10] "Dendrite_Position"                 
+[11] "Dendrite_Spine_Density"            
+[12] "Dendrite_Straightness"             
+[13] "Dendrite_Time"                     
+[14] "Dendrite_Time_Index"               
+[15] "Dendrite_Volume"                   
+[16] "Filament_Area_(sum)"               
+[17] "Filament_Dendrite_Area_(sum)"      
+[18] "Filament_Dendrite_Length_(sum)"    
+[19] "Filament_Dendrite_Volume_(sum)"    
+[20] "Filament_Distance_from_Origin"     
+[21] "Filament_Full_Branch_Depth"        
+[22] "Filament_Full_Branch_Level"        
+[23] "Filament_Length_(sum)"             
+[24] "Filament_No._Dendrite_Branch_Pts"  
+[25] "Filament_No._Dendrite_Branches"    
+[26] "Filament_No._Dendrite_Segments"    
+[27] "Filament_No._Dendrite_Terminal_Pts"
+[28] "Filament_No._Sholl_Intersections"  
+[29] "Filament_No._Spine_Branch_Pts"     
+[30] "Filament_No._Spine_Segments"       
+[31] "Filament_No._Spine_Terminal_Pts"   
+[32] "Filament_No._Unconnected_Parts"    
+[33] "Filament_Position"                 
+[34] "Filament_Spine_Area_(sum)"         
+[35] "Filament_Spine_Length_(sum)"       
+[36] "Filament_Spine_Volume_(sum)"       
+[37] "Filament_Time"                     
+[38] "Filament_Time_Index"               
+[39] "Filament_Volume_(sum)"             
+[40] "Overall"                           
+[41] "Pt_Distance_from_Origin"           
+[42] "Pt_Time_Type=Dendrite"             
+[43] "Pt_Time_Type=Dendrite_Beginning"   
+[44] "Pt_Time_Type=Dendrite_Branch"      
+[45] "Pt_Time_Type=Dendrite_Terminal"    
+\end{verbatim}
+
+每个参数都是神经元的一个指标，比如Dendrite\_Area代表树突的表面积，Dendrite\_Volume代表树突的体积，Dendrite\_Mean\_Diameter代表树突的平均直径，Dendrite\_Length代表树突的长度等等。这些参数的意义，\href{filament_statistics_preferences.html}{imaris说明文档(点击查看)}已经有详细的描述。
+\#\# 数据整理
+由于同一个参数的形态数据都是分散在不同文件夹中的不同文件中，需要将它们合并以便于之后的统计分析。
+\href{Sum\%20of\%20Filament_No._Sholl_Intersections\%20.csv}{合并后的Sholl交点数}数据：
+
+\begin{verbatim}
+# A tibble: 10 x 11
+   .id    `Filament No. Sh~ Unit  Category Radius  Time     ID Var.7 treat
+   <chr>              <int> <lgl> <fct>     <dbl> <int>  <int> <lgl> <chr>
+ 1 (GFP+~                 0 NA    Filament     0.     1 1.00e8 NA    GFP+ 
+ 2 (GFP+~                 9 NA    Filament     1.     1 1.00e8 NA    GFP+ 
+ 3 (GFP+~                 9 NA    Filament     2.     1 1.00e8 NA    GFP+ 
+ 4 (GFP+~                 9 NA    Filament     3.     1 1.00e8 NA    GFP+ 
+ 5 (GFP+~                 9 NA    Filament     4.     1 1.00e8 NA    GFP+ 
+ 6 (GFP+~                11 NA    Filament     5.     1 1.00e8 NA    GFP+ 
+ 7 (GFP+~                 9 NA    Filament     6.     1 1.00e8 NA    GFP+ 
+ 8 (GFP+~                 9 NA    Filament     7.     1 1.00e8 NA    GFP+ 
+ 9 (GFP+~                 9 NA    Filament     8.     1 1.00e8 NA    GFP+ 
+10 (GFP+~                 9 NA    Filament     9.     1 1.00e8 NA    GFP+ 
+# ... with 2 more variables: `max Radius` <dbl>, `Radius Normalized` <dbl>
+\end{verbatim}
+
+.id列是每个神经元的自定义的名字，Filament No. Sholl
+Intersections和Radius列分别是各个半径值对应的Sholl交点数和以1um递增的半径值。
+在此基础上，也增加了计算列max Radius和Radius Normalized：max
+Radius列表示最大的Sholl半径，Radius
+Normalized表示以最大半径为标准的归一化值。 合并后的
+
+
+\end{document}

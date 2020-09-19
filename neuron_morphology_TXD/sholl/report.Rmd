@@ -1,0 +1,138 @@
+---
+title: "树突形态分析数据"
+author: "范祖权"
+date: "2018年8月28日"
+output: 
+  html_document:
+    toc: TRUE
+---
+# 原始数据
+## imaris导出的数据
+所有Sholl交点数的原始数据均为imaris软件自动导出的,文件保存路径在当前目录下的两个子文件夹中：
+```{r,echo=FALSE,comment=NULL}
+knitr::opts_chunk$set(echo=FALSE,comment = NULL)
+subDir
+
+```
+每个文件夹下以神经元为单位，保存了GFP+或GFP-类的神经元形态数据。GFP+类神经元有16个样本，所以该层次下有16个子文件夹：
+```{r}
+gfpParameterDirs
+
+```
+而GFP-类神经元有10个样本：
+```{r}
+nearParameterDirs
+```
+以上每个文件夹中都含有45个csv文件，因为imaris软件对每个神经元进行了45个参数的测量。这些参数分别是：
+```{r}
+Parameters
+```
+每个参数都是神经元的一个指标，比如`r Parameters[1]`代表树突的表面积，`r Parameters[15]`代表树突的体积，`r Parameters[7]`代表树突的平均直径，`r Parameters[6]`代表树突的长度等等。这些参数的意义，[imaris说明文档](filament_statistics_preferences.html)已经有详细的描述。
+
+## ImageJ导出的数据
+
+基于模型的Sholl参数计算值由ImageJ软件计算并导出，分为两部分：16个[GFP+类的神经元数据](Sholl Results of GFP+.csv)和10个[GFP-类的神经元数据](Sholl Results of GFP-.csv)。
+
+
+# 数据整理
+## 几何数据
+
+几何数据包括树突的长度、表面积和神经元的总体积。
+
+### 树突长度数据
+
+合并整理后[得到](Sum of Dendrite_Length .csv)：
+```{r}
+DT::datatable(dplyr::select(lengthData,c(12,1:3,5:6,8)))
+```
+
+* Depth列是这段树突距离胞体处的层次等级。
+* Level列这段树突按直径排序的等级（如[imaris说明文档](filament_statistics_preferences.html)的Figure 3 所示）。
+* Default Labels列是这段树突的标记，包括apical dendrite和basal dendrite。
+
+按treat和Default Labels分组后计算均值和标准差得到:
+```{r}
+DT::datatable(lengthData.sum)
+```
+
+* Length.mean列为长度平均值
+* Length.sd列为长度标准差
+
+### 树突表面积数据
+
+合并整理后[得到](Sum of Dendrite_Area .csv):
+```{r}
+DT::datatable(dplyr::select(areaData,c(12,1:3,5:6,8)))
+```
+
+按treat和Default Labels分组后计算均值和标准差得到:
+```{r}
+DT::datatable(areaData.sum)
+```
+
+
+### 神经元体积数据
+
+合并整理后[得到](Sum of Dendrite_Volume .csv):
+```{r}
+DT::datatable(dplyr::select(volumeData,c(12,1:3,5:6,8)))
+```
+按treat和Default Labels分组后计算均值和标准差得到:
+```{r}
+DT::datatable(volumeData.sum)
+```
+
+
+
+## Sholl分析数据
+### Sholl交点数数据
+
+[合并后的Sholl交点数](Sum of Filament_No._Sholl_Intersections .csv)数据：
+```{r}
+DT::datatable(dplyr::select(shollData2,c(9,1,2,5,10:11)))
+```
+
+* .id列是每个神经元的自定义的名字
+* Radius列是以30um递增的半径值
+* Filament No. Sholl Intersections是各个半径值对应的Sholl交点数。
+
+在此基础上，也增加了计算列max Radius和Radius Normalized：
+
+* max Radius列表示最大的Sholl半径
+* Radius Normalized表示以最大半径为标准的归一化值,等于Radius/max Radius。
+
+按GFP+/-和半径值分组后求Sholl交点数的均值和标准差得到：
+```{r}
+DT::datatable(shollData8)
+```
+
+
+### 基于模型的Sholl参数数据
+
+合并原始数据后得到：
+```{r}
+DT::datatable(detailedShollData)
+```
+
+* treat列是神经元的类别，包括GFP+和GFP-；
+* id列是神经元的编号。
+
+其余各列为Sholl分析计算的参数，这些参数的意义见[ImageJ的Sholl插件帮助文档](https://imagej.net/Sholl_Analysis#Metrics)。只选取其中部分参数进行统计：
+```{r}
+names(detailedShollData)[c(-1,-2)]
+```
+
+
+数据重组变形后为：
+```{r}
+DT::datatable(Sholl.detailed.data.melted)
+```
+
+* variable列是各个参数的名称
+* value列是各个神经元对应的variable列的值。
+
+按GFP+/-以及Sholl参数分组汇总（均值、标准误差）后得到：
+```{r}
+DT::datatable(Sholl.detailed.data.summary)
+```
+

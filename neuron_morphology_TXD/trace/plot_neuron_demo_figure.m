@@ -1,0 +1,20 @@
+figure;p=plot_tree(tr,[],[],[],[],'-2l-thin');
+for i=1:max(size(p))
+%     p(i).Color=[0 0.5 0.5];
+    p(i).Color='red';
+end
+f=gcf;
+f.Color='white';
+ax=gca;
+ax.XAxis.Visible='off';
+ax.YAxis.Visible='off';
+% ax.Title.Interpreter='none';
+% ax.Title.String=trees{21}.name;
+% ax.Title.Position(2)=ax.Position(2);
+scalex=ax.Position(3)/(ax.XAxis.Limits(2)-ax.XAxis.Limits(1))*100;
+scaley=ax.Position(4)/(ax.YAxis.Limits(2)-ax.YAxis.Limits(1))*100;
+scal=axes('Position',[ax.Position(1) ax.Position(2) scalex scaley]);
+scal.XAxis.TickLabels={'';'100\mum';''};
+scal.YAxis.TickLabels={'';'100\mum';''};
+scal.LineWidth=1;
+scal.TickLength(1)=0;

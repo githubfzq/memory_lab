@@ -400,6 +400,10 @@ def apical_upside(neuron):
         return traned
 
 def plot_sholl_demo(neuron, step_size=30, label_dict=None, to_save=""):
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     """Plot sholl analysis demo figure.
     Display the apical and basal part of a neuron, and concentric circles of sholl analysis.
     Args:
@@ -444,4 +448,23 @@ def plot_sholl_demo(neuron, step_size=30, label_dict=None, to_save=""):
     ax.set_axis_off()
     plt.title(None)
     if bool(to_save):
+<<<<<<< Updated upstream
+=======
+        to_save_figure(to_save)
+
+def plot_single_neuron(neuron, put_apical_upside=False, to_save=""):
+    """Plot a neuron.
+    neuron: [neurom.fst._core.FstNeuron] The neuron to plot.
+    put_apical_upside: logical. Whether put apical dendrite upside."""
+    fig, ax = plt.subplots(subplot_kw={'aspect':'equal'})
+    if put_apical_upside:
+        neuron=apical_upside(neuron)
+    view.plot_neuron(ax, neuron)
+    ax.autoscale()
+    ax.set_title("")
+    ax.set_xlabel(None)
+    ax.set_ylabel(None)
+    ax.set_axis_off()
+    if bool(to_save):
+>>>>>>> Stashed changes
         to_save_figure(to_save)
