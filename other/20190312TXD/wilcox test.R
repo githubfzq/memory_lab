@@ -1,0 +1,16 @@
+library(tidyverse)
+control=tibble(pulse1=c(1,0.5,rep(1,5)),
+               pulse2=c(1,0.5,0,1,0,0,0),
+               pulse3=c(1,0.5,0,0.25,0,0,0),
+               pulse4=c(0.5,0.25,rep(0,5)),
+               pulse5=c(rep(0,6),0.25))
+gfc=tibble(pulse1=c(1,0,0,1,0.25,0,0.75),
+           pulse2=c(1,rep(0,6)),
+           pulse3=c(1,rep(0,6)),
+           pulse4=c(0.5,rep(0,6)),
+           pulse5=rep(0,7))
+wilcox.test(control$pulse1,gfc$pulse1)
+wilcox.test(control$pulse2,gfc$pulse2)
+wilcox.test(control$pulse3,gfc$pulse3)
+wilcox.test(control$pulse4,gfc$pulse4)
+wilcox.test(control$pulse5,gfc$pulse5)
