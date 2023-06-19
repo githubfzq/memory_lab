@@ -1,0 +1,6 @@
+outs:
+- md5: bb5c5a996f791aa64c121cc427d33743.dir
+  size: 81812
+  nfiles: 6
+  hash: md5
+  path: AP_fit

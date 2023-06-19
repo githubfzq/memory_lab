@@ -38,6 +38,5 @@ venv
 neuron_morphology_TXD/sholl/.*
 neuron_morphology_TXD/image
 patch/Axon Files
-patch/process
 patch/labBook
 neuron_morphology_TXD/sholl/filament_statistics_preferences_files

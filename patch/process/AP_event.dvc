@@ -1,0 +1,6 @@
+outs:
+- md5: 852f614321b4feefc6629b30f517cc0a.dir
+  size: 952572
+  nfiles: 103
+  hash: md5
+  path: AP_event

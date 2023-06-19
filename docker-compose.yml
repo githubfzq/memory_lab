@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  datalab:
+    image: memory_fzq/notebook:latest
+    ports:
+      - "8888:8888"
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      tags: 
+        - memory_fzq/notebook:latest
+    volumes:
+      - ./behavior:/home/$NB_USER/work/behavior
+      - ./neuron_morphology_TXD:/home/$NB_USER/work/neuron_morphology_TXD
+      - ./other:/home/$NB_USER/work/other
+      - ./patch:/home/$NB_USER/work/patch
+      - ./reconstruction:/home/$NB_USER/work/reconstruction
+      # - ./build/user-settings:/home/$NB_USER/.jupyter/lab/user-settings
+    environment:
+      - NB_USER=${NB_USER}
+      - CHOWN_HOME=yes
+      - NB_UID=${NB_UID}
+    user: root
+    deploy:
+      resources:
+        limits:
+          memory: 12G
+
+  # dev:
+  #   image: memory_fzq/dev
+  #   ports:
+  #     - "8889:8888"
+  #   build: 
+  #     context: .
+  #     dockerfile: multistage.Dockerfile
+  #     tags: 
+  #       - memory_fzq/dev
+  #   volumes:
+  #     - ./behavior:/home/$NB_USER/work/behavior
+  #     - ./neuron_morphology_TXD:/home/$NB_USER/work/neuron_morphology_TXD
+  #     - ./other:/home/$NB_USER/work/other
+  #     - ./patch:/home/$NB_USER/work/patch
+  #     - ./reconstruction:/home/$NB_USER/work/reconstruction
+  #   environment:
+  #     - NB_USER=${NB_USER}
+  #     - CHOWN_HOME=yes
+  #     - NB_UID=${NB_UID}
+  #   user: root

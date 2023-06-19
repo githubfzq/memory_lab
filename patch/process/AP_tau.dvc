@@ -1,0 +1,6 @@
+outs:
+- md5: e3b8e318a227cc1a217d2ac5de2f6b1e.dir
+  size: 12194304
+  nfiles: 28
+  hash: md5
+  path: AP_tau

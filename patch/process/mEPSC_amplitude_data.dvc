@@ -1,0 +1,6 @@
+outs:
+- md5: c0f00d4c797995a63055a6dd87430ad2.dir
+  size: 85485
+  nfiles: 3
+  hash: md5
+  path: mEPSC_amplitude_data

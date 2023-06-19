@@ -1,0 +1,6 @@
+outs:
+- md5: 0b97367e3afcd83d7b1daeddd7cac8fd.dir
+  size: 81500
+  nfiles: 3
+  hash: md5
+  path: mEPSC_interEvent

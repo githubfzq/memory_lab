@@ -7,7 +7,8 @@ from matplotlib import pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.collections import PatchCollection
 import neurom as nm
-from neurom.view import view
+from neurom.io.utils import load_morphologies
+from neurom.view.matplotlib_impl import plot_morph
 from plot_helper import plot_unified_scale_grid, add_scalebar, to_save_figure
 from analysis_functions import zero_padding, getAllFiles
 
@@ -40,7 +41,7 @@ class morpho_parser:
             }
         else:
             self.path_root = path_root
-        self.neurons = nm.load_neurons(self.path_root["swc"])
+        self.neurons = load_morphologies(self.path_root["swc"])
         self.files = {}
         self.files["swc"], _ = getAllFiles(self.path_root["swc"], ends="swc")
         self.files["imaris"] = {"stat": [], "soma": []}
@@ -367,7 +368,7 @@ def plot_multi_neuron(neurons, layout, to_save="", scalebar=(200,"$\mu m$"),fig_
     elif layout[0]==1 and axs.ndim==1:
         axs=axs[np.newaxis,:]
     for (ind, ax), neuron in zip(np.ndenumerate(np.array(axs)), neurons):
-        view.plot_neuron(ax, neuron)
+        plot_morph(neuron, ax)
         ax.autoscale()
         ax.set_title("")
         ax.set_xlabel("")
@@ -393,17 +394,13 @@ def apical_upside(neuron):
         apic_center = np.mean(
             np.concatenate(list(map(lambda a: a.points[:, :3], apic))), axis=0
         )
-        angle = np.pi / 2 - np.angle(np.complex(apic_center[0], apic_center[1]))
+        angle = np.pi / 2 - np.angle(complex(apic_center[0], apic_center[1]))
         roted = nm.geom.rotate(traned, (0, 0, 1), angle)
         return roted
     else:
         return traned
 
 def plot_sholl_demo(neuron, step_size=30, label_dict=None, to_save=""):
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     """Plot sholl analysis demo figure.
     Display the apical and basal part of a neuron, and concentric circles of sholl analysis.
     Args:
@@ -416,7 +413,7 @@ def plot_sholl_demo(neuron, step_size=30, label_dict=None, to_save=""):
     neuron = apical_upside(neuron)
     fig = plt.figure()
     ax = fig.add_subplot(1,1,1, aspect='equal')
-    view.plot_neuron(ax, neuron)
+    plot_morph(neuron, ax)
 
     # draw circles
     center = neuron.soma.center[:2]
@@ -448,8 +445,6 @@ def plot_sholl_demo(neuron, step_size=30, label_dict=None, to_save=""):
     ax.set_axis_off()
     plt.title(None)
     if bool(to_save):
-<<<<<<< Updated upstream
-=======
         to_save_figure(to_save)
 
 def plot_single_neuron(neuron, put_apical_upside=False, to_save=""):
@@ -459,12 +454,11 @@ def plot_single_neuron(neuron, put_apical_upside=False, to_save=""):
     fig, ax = plt.subplots(subplot_kw={'aspect':'equal'})
     if put_apical_upside:
         neuron=apical_upside(neuron)
-    view.plot_neuron(ax, neuron)
+    plot_tree(neuron, ax)
     ax.autoscale()
     ax.set_title("")
     ax.set_xlabel(None)
     ax.set_ylabel(None)
     ax.set_axis_off()
     if bool(to_save):
->>>>>>> Stashed changes
         to_save_figure(to_save)

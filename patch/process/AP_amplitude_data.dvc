@@ -1,0 +1,6 @@
+outs:
+- md5: 8a4d45fdd0734ccab2037ca9688ab0db.dir
+  size: 471054
+  nfiles: 97
+  hash: md5
+  path: AP_amplitude_data

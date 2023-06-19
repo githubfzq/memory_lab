@@ -212,11 +212,7 @@ def plot_signif_marker(prop):
     """Plot significant marker.
     prop: boxplot component returned by `pyplot.boxplot()`."""
 
-<<<<<<< Updated upstream
-def to_save_figure(to_save, formats=['png','eps']):
-=======
 def to_save_figure(to_save, formats=['png','eps','pdf']):
->>>>>>> Stashed changes
     """Save figure to file.
     to_save: String. Filename of figure file to save.
     formats: List. The format of figure, each saved as a file.
