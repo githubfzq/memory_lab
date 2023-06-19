@@ -264,13 +264,13 @@ class morpho_parser:
         neuron: `Neuron` object."""
         def f1_1(name,part='all'):
             if part=='all':
-                cur_res = nm.get(name, neuron).mean()
+                cur_res = np.array(nm.get(name, neuron)).mean()
                 cur_key = 'mean_' + name
             elif part=='apical':
-                cur_res = nm.get(name, neuron, neurite_type=nm.APICAL_DENDRITE).mean()
+                cur_res = np.array(nm.get(name, neuron, neurite_type=nm.APICAL_DENDRITE)).mean()
                 cur_key = 'mean_' + name + '(apical)'
             elif part=='basal':
-                cur_res = nm.get(name, neuron, neurite_type=nm.BASAL_DENDRITE).mean()
+                cur_res = np.array(nm.get(name, neuron, neurite_type=nm.BASAL_DENDRITE)).mean()
                 cur_key = 'mean_' + name + '(basal)'
             yield (cur_key, cur_res)
         def sholl_f(name, part='all'):
