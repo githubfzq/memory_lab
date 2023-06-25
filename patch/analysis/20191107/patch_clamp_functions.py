@@ -102,14 +102,14 @@ class epsc_parser(electro_base):
 
         ax = plt.gca()
         axin = zoomed_inset_axes(
-            ax,
-            10,
-            4,
+            ax, 1, 4,
             axes_kwargs={
                 "xlabel": "10 s",
                 "ylabel": "10 pA",
                 "xticks": [],
                 "yticks": [],
+                "xlim": (0, 10),
+                "ylim": (0, 10)
             },
         )
         axin.spines["top"].set_visible(False)
@@ -186,6 +186,8 @@ class ap_parser(electro_base):
             demo.setSweep(sweep-1)
             ax1.plot(demo.sweepX[500:5500], demo.sweepY[500:5500], sweepYcolor)
             ax2.plot(demo.sweepX[500:5500], demo.sweepC[500:5500], sweepCcolor)
+        
+        plt.draw()
         asp1=get_aspect_scale(ax1)
         ax2.set_aspect(asp1[1]*aspect_ratio/asp1[0])
         add_scalebar(
@@ -196,7 +198,7 @@ class ap_parser(electro_base):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             plt.tight_layout()
-        if bool(to_save):
+        if to_save:
             to_save_figure(to_save)
 
     def __readTitle(self, item):
@@ -495,6 +497,7 @@ class ramp_parser(electro_base):
             abf.setSweep(sweep - 1)
             ax1.plot(abf.sweepX, abf.sweepY, sweepYcolor)
             ax2.plot(abf.sweepX, abf.sweepC, sweepCcolor)
+        plt.draw()
         asp1=get_aspect_scale(ax1)
         ax2.set_aspect(asp1[1]*aspect_ratio/asp1[0])
         ax1.axis("off")
@@ -503,7 +506,7 @@ class ramp_parser(electro_base):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             plt.tight_layout()
-        if bool(to_save):
+        if to_save:
             to_save_figure(to_save)
 
     def get_threshold_current(self):
@@ -567,6 +570,7 @@ class electro_parser(epsc_parser, ap_parser, ramp_parser):
         self.files = merge_dicts(files, self.files)
         self.__backup = None
 
+    
     def get_all_data(self, item="all", method="python", select_trace=13):
         """Get all electrophisiological data, including RMP(rest membrane potential), Rm(membrane resistance).
         method: {'python', 'local', 'all'}, extract data by python package or manual data (for AP data) or merging both.

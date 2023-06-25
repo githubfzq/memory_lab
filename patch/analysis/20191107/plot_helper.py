@@ -27,7 +27,7 @@ def get_aspect_scale(ax):
     return result
 
 
-def add_scalebar(ax, num, unit, fig, bbox_to_anchor=[0,0,1,1], x_label=None, y_label=None):
+def add_scalebar(ax, num, unit, fig, bbox_to_anchor=(0,0,1,1), x_label=None, y_label=None):
     """Add scalebar to axes `ax`.
     num: number or tuple (number, number). Scalebar length.
     unit: String, or (Sring, string).
@@ -43,9 +43,7 @@ def add_scalebar(ax, num, unit, fig, bbox_to_anchor=[0,0,1,1], x_label=None, y_l
     x_label = str(num_x)+unit_x if x_label is None else x_label
     y_label = str(num_y)+unit_y if y_label is None else y_label
     axin = zoomed_inset_axes(
-        ax,
-        num_x,
-        "lower right",
+        ax, 1, "lower right",
         bbox_to_anchor=bbox_to_anchor,
         bbox_transform=fig.transFigure,
         axes_kwargs={
@@ -53,9 +51,11 @@ def add_scalebar(ax, num, unit, fig, bbox_to_anchor=[0,0,1,1], x_label=None, y_l
             "ylabel": y_label,
             "xticks": [],
             "yticks": [],
+            "xlim": (0, num_x),
+            "ylim": (0, num_y)
         },
     )
-    axin.set_ylim(top=num_y/num_x)
+    # axin.set_ylim(top=num_y/num_x)
     axin.yaxis.set_label_position("right")
     axin.spines["top"].set_visible(False)
     axin.spines["left"].set_visible(False)
@@ -218,4 +218,20 @@ def to_save_figure(to_save, formats=['png','eps','pdf']):
     formats: List. The format of figure, each saved as a file.
     """
     for fmt in formats:
+
         plt.savefig(to_save+'.'+fmt, dpi=600, transparent=True, bbox_inches='tight')
+
+def get_subplots_position(axs):
+    """
+    Get the bounding box position for all subplots.
+    axs: the numpy array of 2d-axes.
+    return: (x_min, y_min, x_max, y_max)
+    """
+    shape_ = axs.shape
+    pos = np.empty((2, 2, shape_[0], shape_[1]))
+    for ind, ax in np.ndenumerate(axs):
+        p = ax.get_position()
+        pos[:, :, ind[0], ind[1]] = [[p.xmin, p.xmax], [p.ymin, p.ymax]]
+    p1 = pos[:, 0, :, :].min(axis=(1, 2))
+    p2 = pos[:, 1, :, :].max(axis=(1, 2))
+    return (*p1, *p2)

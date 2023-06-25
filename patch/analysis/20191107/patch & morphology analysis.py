@@ -227,7 +227,7 @@ mpp.plot_sholl(sholl_part=True)
 #  Analyse by morphological data exported by Imaris:
 
 # %%
-morphoData = mpp.get_imaris_stat()
+morphoData = mpp.imarisData
 morphoData.head()
 
 # %%
@@ -240,7 +240,7 @@ mpp.plot_sholl(sholl_part=False)
 #  ## branch order
 
 # %%
-depthData = mpp.get_depth_data()
+depthData = mpp.depthData
 depthData.head()
 
 # %%

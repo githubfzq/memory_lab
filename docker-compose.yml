@@ -11,11 +11,7 @@ services:
       tags: 
         - memory_fzq/notebook:latest
     volumes:
-      - ./behavior:/home/$NB_USER/work/behavior
-      - ./neuron_morphology_TXD:/home/$NB_USER/work/neuron_morphology_TXD
-      - ./other:/home/$NB_USER/work/other
-      - ./patch:/home/$NB_USER/work/patch
-      - ./reconstruction:/home/$NB_USER/work/reconstruction
+      - .:/home/$NB_USER/work
       # - ./build/user-settings:/home/$NB_USER/.jupyter/lab/user-settings
     environment:
       - NB_USER=${NB_USER}

@@ -4,10 +4,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatch
-from mpl_toolkits.mplot3d import Axes3D
 from brokenaxes import brokenaxes
 from sklearn.cluster import KMeans
 from sklearn import preprocessing
+from sklearn.impute import SimpleImputer
 from sklearn.decomposition import PCA
 from sklearn.svm import LinearSVC
 from sklearn.pipeline import make_pipeline
@@ -16,6 +16,7 @@ from morphological_functions import morpho_parser
 from patch_clamp_functions import electro_parser
 from analysis_functions import merge_dicts, fillna_unique, zero_padding
 from plot_helper import plot_signif_marker, to_save_figure
+from functools import cache
 
 
 class cluster_processor(electro_parser, morpho_parser):
@@ -47,29 +48,26 @@ class cluster_processor(electro_parser, morpho_parser):
         )
         self.mpp = morpho_parser_ if morpho_parser_ is not None else morpho_parser()
 
+    @cache
     def get_all_data(self, how="outer"):
         """Merge electrophysiological data and morphological data.
         Parameters:
         - select_trace: Select one sweep of AP electrophysiological recording to represent its neuron.
         - how: passed to DataFrame.merge()"""
-        if self.dat is None:
-            elec_dat = self.elec_ps.get_all_data(method="all")
-            morpho_dat = self.mpp.get_all_data()
-            map_dat = self.get_id_table()
-            map_dat.rename(columns={"CellID": "cellID_ap"}, inplace=True)
-            elec_dat = fillna_unique(elec_dat, 'cellID_ap', 'elec_empty_')
-            map_dat = fillna_unique(map_dat, 'cellID_ap', 'map_empty_')
-            result = elec_dat.merge(
-                map_dat, how, on="cellID_ap"
-            )
-            result = fillna_unique(result, 'reconstruction_ID', 'res_empty_')
-            morpho_dat.rename(columns={'neuron_ID':"reconstruction_ID"}, inplace=True)
-            morpho_dat = fillna_unique(morpho_dat, 'reconstruction_ID', 'morpho_empty_')
-            result = result.merge(morpho_dat, how, on="reconstruction_ID")
-            result.replace(r'.*empty.*', np.nan, regex=True, inplace=True)
-            self.dat = result.copy()
-        else:
-            result = self.dat.copy()
+        elec_dat = self.elec_ps.get_all_data(method="all")
+        morpho_dat = self.mpp.get_all_data()
+        map_dat = self.get_id_table()
+        map_dat.rename(columns={"CellID": "cellID_ap"}, inplace=True)
+        elec_dat = fillna_unique(elec_dat, 'cellID_ap', 'elec_empty_')
+        map_dat = fillna_unique(map_dat, 'cellID_ap', 'map_empty_')
+        result = elec_dat.merge(
+            map_dat, how, on="cellID_ap"
+        )
+        result = fillna_unique(result, 'reconstruction_ID', 'res_empty_')
+        morpho_dat.rename(columns={'neuron_ID':"reconstruction_ID"}, inplace=True)
+        morpho_dat = fillna_unique(morpho_dat, 'reconstruction_ID', 'morpho_empty_')
+        result = result.merge(morpho_dat, how, on="reconstruction_ID")
+        result.replace(r'.*empty.*', np.nan, regex=True, inplace=True)
         return result
     
     def get_id_table(self):
@@ -80,19 +78,25 @@ class cluster_processor(electro_parser, morpho_parser):
         map_dat = map_dat.rename({"patch_ID": "CellID"}, axis=1)
         return map_dat
 
-    def k_means(self, dat=None, n_cluster=2, return_scaled=False, return_filled=False, return_model=False, random_state=19):
+    def k_means(self, dat=None, n_cluster=2, return_scaled=False, return_filled=False, return_model=False, random_state=19,
+                label_mapping=None):
         """Compute k-means.
         dat: data used to do k-means algorithm.
-        return_filled: Whether return NA_filled data."""
-        kmeans = KMeans(n_clusters=n_cluster, init='random', random_state=random_state)
+        return_filled: Whether return NA_filled data.
+        label_mapping: dict. Re-mapping the cluster ids.
+        """
+        kmeans = KMeans(n_clusters=n_cluster, init='random', n_init=10, random_state=random_state)
         if dat is None:
             dat = self.get_all_data("inner")
             dat = dat[dat["cellID_ap"].notna()]
         ca_dat = k_means_preprocess(dat)
-        ca_dat_filled = ca_dat.drop(columns='cellID_ap').fillna(ca_dat.mean())
+        ca_values = ca_dat.drop(columns='cellID_ap')
+        ca_dat_filled = ca_values.fillna(ca_values.mean())
         ca_dat_scaled = preprocessing.scale(ca_dat_filled)
         kmeans.fit(ca_dat_scaled)
         pred = kmeans.fit_predict(ca_dat_scaled)
+        if label_mapping:
+            pred = np.vectorize(lambda k: label_mapping.get(k, k))(pred)
         if return_model:
             return kmeans
         if not return_filled:
@@ -133,12 +137,14 @@ class cluster_processor(electro_parser, morpho_parser):
 
     def plot_decomposition_scatter(
         self, ca_dat=None, dim1=0, dim2=1, to_save="", plot_3d=False, fig_size=(3,3), show_legend=True,
-        label_map=None,
+        label_map=None, colors=None,
     ):
         """Plot PCA scatter.
         dim1, dim2: The number of dimension after PCA.
         plot_3d: 3D scatter plot. If true, auto-select first 3 dimensions.
-        label_map: dict. map cluster ID to label string. Default: {0: 'cluster 1', 1: 'cluster 2', ...}."""
+        label_map: dict. map cluster ID to label string. Default: {0: 'cluster 1', 1: 'cluster 2', ...}.
+        colors: list. default to C1, C2, C3...
+        """
         if ca_dat is None:
             ca_dat = self.k_means(return_filled=True, return_scaled=True)
         X = ca_dat.to_numpy()[:, :-1]
@@ -149,7 +155,7 @@ class cluster_processor(electro_parser, morpho_parser):
         if label_map is None:
             label_map={clust:'cluster {}'.format(clust + 1) for clust in np.sort(ca_dat.cluster.unique())}
         if plot_3d:
-            ax = Axes3D(fig)
+            ax = fig.add_subplot(projection='3d')
             ax.view_init(30,30)
             dim1, dim2, dim3 = (0, 1, 2)
             for clust in np.sort(ca_dat.cluster.unique()):
@@ -168,7 +174,7 @@ class cluster_processor(electro_parser, morpho_parser):
             ax.set_zlabel("Component {}".format(dim3 + 1))
             plt.yticks(rotation=30,horizontalalignment='center',
                         verticalalignment='baseline',rotation_mode='anchor')
-            plt.tight_layout()
+            # plt.tight_layout()
         else:
             ax = fig.add_subplot(1, 1, 1)
             for clust in np.sort(ca_dat.cluster.unique()):
@@ -184,7 +190,7 @@ class cluster_processor(electro_parser, morpho_parser):
             ax.set_xlabel("Component {}".format(dim1 + 1))
             ax.set_ylabel("Component {}".format(dim2 + 1))
             plt.tight_layout()
-        if bool(to_save):
+        if to_save:
             to_save_figure(to_save)
 
     def stat_analyse(
@@ -221,7 +227,8 @@ class cluster_processor(electro_parser, morpho_parser):
                 X = train_data.to_numpy()
                 return X
         X_train ,y_train = preprocess(train_data)
-        clf = make_pipeline(preprocessing.StandardScaler(), LinearSVC())
+        imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+        clf = make_pipeline(imp, preprocessing.StandardScaler(), LinearSVC())
         clf.fit(X_train, y_train)
         def predict_fun(dat):
             X_new = preprocess(dat)
@@ -457,14 +464,14 @@ def plot_cluster_sholl(
     cluster1_ids, cluster2_ids: neurons IDs of two clusters.
     """
     if not sholl_part:
-        imarisData = morpho_parser.get_imaris_stat()
+        imarisData = morpho_parser.imarisData
         shollData_clust1 = imarisData[
-            (imarisData.Variable == "Filament No. Sholl Intersections") & imarisData.neuron_ID.isin(cluster1_ids)
+            (imarisData.Variable == "Filament No. Sholl Intersections") & (imarisData.neuron_ID+".swc").isin(cluster1_ids)
         ].loc[:, ["neuron_ID", "Radius", "Value"]]
         shollData_clust1['cluster'] = clusters[0]
         shollData_clust1 = zero_padding(shollData_clust1, 'Value')
         shollData_clust2 = imarisData[
-            (imarisData.Variable == "Filament No. Sholl Intersections") & imarisData.neuron_ID.isin(cluster2_ids)
+            (imarisData.Variable == "Filament No. Sholl Intersections") & (imarisData.neuron_ID+".swc").isin(cluster2_ids)
         ].loc[:, ["neuron_ID", "Radius", "Value"]]
         shollData_clust2['cluster'] = clusters[1]
         shollData_clust2 = zero_padding(shollData_clust2, 'Value')
@@ -474,7 +481,7 @@ def plot_cluster_sholl(
         )
         shollPlotData = (
             shollData
-            .groupby(["cluster","Radius"])
+            .groupby(["cluster","Radius"])[['Value']]
             .agg([np.mean, sem])
         )
         plt.figure(figsize=fig_size)
