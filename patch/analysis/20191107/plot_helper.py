@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import transforms
 from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes
+import os.path
 
 
 def plot_unified_scale_grid(fig, axs):
@@ -219,7 +220,8 @@ def to_save_figure(to_save, formats=['png','eps','pdf']):
     """
     for fmt in formats:
 
-        plt.savefig(to_save+'.'+fmt, dpi=600, transparent=True, bbox_inches='tight')
+        path = os.path.join("figures", fmt, to_save+'.'+fmt)
+        plt.savefig(path, dpi=600, transparent=True, bbox_inches='tight')
 
 def get_subplots_position(axs):
     """

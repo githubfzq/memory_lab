@@ -1,0 +1,5 @@
+outs:
+- md5: 445f109b51e83b54f972d6cf9171caaf
+  size: 17597
+  hash: md5
+  path: mean_neurite_lengths(apical)_gfp_clusters.eps

@@ -1,0 +1,5 @@
+outs:
+- md5: 55ea8036a233c6adfdf52a9fadf22c78
+  size: 9710
+  hash: md5
+  path: AP1_amp_clusters.pdf

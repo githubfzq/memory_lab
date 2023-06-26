@@ -424,7 +424,7 @@ class ap_parser(electro_base):
             plt.show()
             figIFdemo = sns_line.get_figure()
             if bool(to_save):
-                figIFdemo.savefig("instantaneous freq of" + title, dpi=600)
+                figIFdemo.savefig("figures/png/instantaneous freq of" + title, dpi=600)
 
     def plot_demo_distribution(self, term, file_id, to_save=""):
         """Plot a bar plot of AP number vs. sweep number.
@@ -754,8 +754,8 @@ def plot_IF_CV_distribution(IFstat, to_save=""):
     plt.xlabel("Current step (nA)")
     plt.ylabel("CV of instantaneous frequency")
     plt.show()
-    if bool(to_save):
-        figIFdist.savefig("IF_distribution", dpi=600)
+    if to_save:
+        figIFdist.savefig("figures/png/IF_distribution", dpi=600)
 
 
 def read_atf(filename):

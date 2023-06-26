@@ -1,0 +1,5 @@
+outs:
+- md5: 17035ccb19b94d9c30a008eb2f0eb80c
+  size: 62470
+  hash: md5
+  path: demo_ET1_ramp.png

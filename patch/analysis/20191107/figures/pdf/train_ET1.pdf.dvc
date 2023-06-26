@@ -1,0 +1,5 @@
+outs:
+- md5: 82fe78b4506d058b3f72f975ac8077e8
+  size: 1604482
+  hash: md5
+  path: train_ET1.pdf

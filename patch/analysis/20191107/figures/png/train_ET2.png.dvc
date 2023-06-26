@@ -1,0 +1,5 @@
+outs:
+- md5: 0de779ade8332bc121261ca51980ffe6
+  size: 758087
+  hash: md5
+  path: train_ET2.png

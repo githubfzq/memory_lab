@@ -1,0 +1,5 @@
+outs:
+- md5: fb132077b6135064407e2e53078cacf9
+  size: 48183
+  hash: md5
+  path: inv_second_ISI_clusters.png

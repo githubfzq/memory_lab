@@ -3,7 +3,6 @@
 *.csv
 *.swc
 *.xlsx
-*.png
 *.mat
 *.TIF
 *.bmp
@@ -16,8 +15,6 @@
 *.dat
 *.stp
 *.spf
-*.eps
-*.pdf
 *.pyc
 *.traces
 *.tif

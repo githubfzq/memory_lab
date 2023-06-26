@@ -1,0 +1,5 @@
+outs:
+- md5: 82f3a16b824e86d119d497f47ecfa4f7
+  size: 96280
+  hash: md5
+  path: PCA_dim1_3.png

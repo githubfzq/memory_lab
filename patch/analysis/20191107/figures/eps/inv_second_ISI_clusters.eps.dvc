@@ -1,0 +1,5 @@
+outs:
+- md5: d597006dd10676868aa288ef7a7a2181
+  size: 15061
+  hash: md5
+  path: inv_second_ISI_clusters.eps

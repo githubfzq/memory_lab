@@ -1,0 +1,5 @@
+outs:
+- md5: 63f3bb5a00c59507db59b5c240f524d9
+  size: 15533
+  hash: md5
+  path: threshold_V_clusters.eps

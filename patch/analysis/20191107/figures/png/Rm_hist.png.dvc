@@ -1,0 +1,5 @@
+outs:
+- md5: fcc36e59c97cea4b0cfdaf58223d5be5
+  size: 83511
+  hash: md5
+  path: Rm_hist.png

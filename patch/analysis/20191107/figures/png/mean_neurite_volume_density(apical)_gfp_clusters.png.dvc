@@ -1,0 +1,5 @@
+outs:
+- md5: b3738ce3115252828699d1b307d31728
+  size: 58674
+  hash: md5
+  path: mean_neurite_volume_density(apical)_gfp_clusters.png

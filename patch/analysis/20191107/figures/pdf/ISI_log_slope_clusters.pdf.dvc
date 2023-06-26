@@ -1,0 +1,5 @@
+outs:
+- md5: ebb5870f9d18150eb484d876c9f56e72
+  size: 8983
+  hash: md5
+  path: ISI_log_slope_clusters.pdf

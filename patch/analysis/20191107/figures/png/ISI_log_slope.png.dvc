@@ -1,0 +1,5 @@
+outs:
+- md5: 9512d878e193ddb5c8ea26fc1746dfa4
+  size: 44980
+  hash: md5
+  path: ISI_log_slope.png

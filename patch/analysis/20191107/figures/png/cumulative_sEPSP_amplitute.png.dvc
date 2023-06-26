@@ -1,0 +1,5 @@
+outs:
+- md5: 22366d0e896afa5eff73e80b26770c8b
+  size: 155191
+  hash: md5
+  path: cumulative_sEPSP_amplitute.png
