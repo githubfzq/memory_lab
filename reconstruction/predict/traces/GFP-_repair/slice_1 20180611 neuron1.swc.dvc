@@ -1,0 +1,6 @@
+outs:
+- md5: 4410234d0e958c2092d15ac1ddd54d4e
+  size: 295063
+  isexec: true
+  hash: md5
+  path: slice_1 20180611 neuron1.swc

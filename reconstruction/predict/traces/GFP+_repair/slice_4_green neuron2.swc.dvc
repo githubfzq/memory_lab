@@ -1,0 +1,6 @@
+outs:
+- md5: 5fc84332e330308c684cc031ebf68c23
+  size: 287019
+  isexec: true
+  hash: md5
+  path: slice_4_green neuron2.swc

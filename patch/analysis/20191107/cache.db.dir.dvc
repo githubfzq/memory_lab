@@ -1,0 +1,5 @@
+outs:
+- md5: a2518c6824a31725186ecfc23ead30db
+  size: 552
+  hash: md5
+  path: cache.db.dir

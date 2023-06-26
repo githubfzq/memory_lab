@@ -1,0 +1,17 @@
+name: patch
+channels:
+  - conda-forge
+dependencies:
+  - scipy
+  - seaborn
+  - dill
+  - pandas
+  - pip
+  - scikit-learn
+  - ipykernel
+  - matplotlib
+  - brokenaxes
+  - pip:
+    - efel
+    - neurom
+    - pyabf
