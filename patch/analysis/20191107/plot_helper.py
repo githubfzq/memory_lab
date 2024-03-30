@@ -209,14 +209,24 @@ def get_max_ratio_sum_compact(ratio):
     return np.array([ratio_x.sum(), ratio_y.sum()]).max()
 
 
-def plot_signif_marker(prop):
+def plot_signif_marker(plot_data, ax, X_pair, marker="*", **kwargs):
     """Plot significant marker.
-    prop: boxplot component returned by `pyplot.boxplot()`."""
+    plot_data: List of 1-d array. Each array is a data series.
+    ax: Axes object.
+    X_pair: tuple of 2-element int. The pair of data series to plot.
+    marker: String. The marker to plot.
+    kwargs: Other arguments to pass to get_bracket_position.
+    """
+    gap_px = kwargs.pop("gap_px", 100)
+    tick_px = kwargs.pop("tick_px", 50)
+    bracket, text = get_bracket_position(ax, plot_data, X_pair, gap_px, tick_px)
+    ax.plot(bracket[:,0], bracket[:,1], lw=1, color='k')
+    ax.text(text[0], text[1], marker, ha='center', va='bottom')
 
-def to_save_figure(to_save, formats=['png','eps','pdf']):
+def to_save_figure(to_save, formats=('png','eps','pdf','svg','tif')):
     """Save figure to file.
     to_save: String. Filename of figure file to save.
-    formats: List. The format of figure, each saved as a file.
+    formats: tuple. The format of figure, each saved as a file.
     """
     for fmt in formats:
 
@@ -237,3 +247,53 @@ def get_subplots_position(axs):
     p1 = pos[:, 0, :, :].min(axis=(1, 2))
     p2 = pos[:, 1, :, :].max(axis=(1, 2))
     return (*p1, *p2)
+
+def get_bracket_position(ax, data, Xs=(1,2), gap_px=100, tick_px=50):
+    """
+    Get the bracket position for the boxplot.
+    ax: the axes object.
+    data: the data of boxplot.
+    Xs: the x-axis position of the bracket.
+    gap_px: the gap between the bracket and the boxplot.
+    tick_px: the length of the bracket.
+    
+    return:
+    - bracket_pos: A 4*2 array, each row is the x-y position of a point of the bracket.
+    - text_pos: A 1*2 array, the x-y position of the text.
+    """
+    grp_limx = max(d.max() for d in data[:2])
+    line_px = ax.transData.transform([(Xs[0], grp_limx), (Xs[1], grp_limx)])
+    bracket_pos = ax.transData.inverted().transform([
+        (line_px[0][0], line_px[0][1] + gap_px),
+        (line_px[0][0], line_px[0][1] + gap_px + tick_px),
+        (line_px[1][0], line_px[1][1] + gap_px + tick_px),
+        (line_px[1][0], line_px[1][1] + gap_px),
+    ])
+    text_pos = ax.transData.inverted().transform(
+        ((line_px[0][0] + line_px[1][0]) / 2, line_px[0][1] + gap_px + tick_px)
+    )
+    return bracket_pos, text_pos
+
+def plot_pca_components(pca_components, xlabel, to_save=None, figsize=(4, 3)):
+    """
+    Plot the coefficients of PCA components.
+    pca_components: (n_components, n_features) array.
+    xlabel: String. The label of x-axis.
+    to_save: String. The filename to save the figure.
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    mat_plot = ax.pcolormesh(
+        np.arange(pca_components.shape[1] + 1) + 0.5,
+        np.arange(pca_components.shape[0] + 1) + 0.5,
+        pca_components,
+        cmap="RdBu_r",
+    )
+    ax.spines["top"].set_visible(True)
+    ax.spines["right"].set_visible(True)
+    plt.xlabel(xlabel)
+    plt.ylabel("PCA components")
+    plt.yticks(np.arange(1, pca_components.shape[0]+1), np.arange(pca_components.shape[0], 0, -1))
+    cbar = plt.colorbar(mat_plot)
+    cbar.set_label("Coefficients of PCA components")
+    if to_save:
+        to_save_figure(to_save)

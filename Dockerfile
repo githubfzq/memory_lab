@@ -1,4 +1,4 @@
-FROM jupyter/base-notebook AS base-builder
+FROM jupyter/base-notebook:aarch64-2023-06-26 AS base-builder
 
 USER root
 
@@ -38,11 +38,11 @@ USER jovyan
 WORKDIR /home/jovyan
 
 # install jupyterlab extensions or dependencies
-COPY --chown=jovyan:users ./build/requirements.txt ./build/requirements.txt
+# COPY --chown=jovyan:users ./build/requirements.txt ./build/requirements.txt
 
-RUN --mount=type=cache,target=/home/jovyan/.cache/pip \
-    pip install -r ./build/requirements.txt
+# RUN --mount=type=cache,target=/home/jovyan/.cache/pip \
+#     pip install -r ./build/requirements.txt
 
-COPY --from=conda-builder --chown=jovyan:users /opt/conda/envs /opt/conda/envs
-COPY --from=conda-builder --chown=jovyan:users /opt/conda/share /opt/conda/share
+COPY --from=conda-builder --chown=jovyan:users --chmod=2775 /opt/conda/envs /opt/conda/envs
+COPY --from=conda-builder --chown=jovyan:users --chmod=2775 /opt/conda/share /opt/conda/share
 

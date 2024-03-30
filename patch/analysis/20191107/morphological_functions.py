@@ -13,6 +13,7 @@ from plot_helper import plot_unified_scale_grid, add_scalebar, to_save_figure, g
 from analysis_functions import zero_padding, getAllFiles
 import os.path
 from cache_util import cache
+from functools import partial
 
 class morpho_parser:
 
@@ -123,7 +124,7 @@ class morpho_parser:
                 alpha=0.6,
             )
             plt.ylabel("Sholl intersections")
-            plt.xlabel("$Radius\ (\mu m)$")
+            plt.xlabel("Radius ($\mu m$)")
         else:
             dat = self.sholl_part_stat
             dat = dat.pivot(
@@ -247,15 +248,18 @@ class morpho_parser:
     def _get_demo_morpho_parameter_(self, neuron):
         """Get morphology parameters of a neuron (max_sholl_intercept).
         neuron: `Neuron` object."""
-        def f1_1(name,part='all'):
+        def f1_1(name,part='all', filter_func=lambda x:True):
             if part=='all':
-                cur_res = np.array(nm.get(name, neuron)).mean()
+                cur_res = np.array(nm.get(name, neuron))
+                cur_res = cur_res[filter_func(cur_res)].mean()
                 cur_key = 'mean_' + name
             elif part=='apical':
-                cur_res = np.array(nm.get(name, neuron, neurite_type=nm.APICAL_DENDRITE)).mean()
+                cur_res = np.array(nm.get(name, neuron, neurite_type=nm.APICAL_DENDRITE))
+                cur_res = cur_res[filter_func(cur_res)].mean()
                 cur_key = 'mean_' + name + '(apical)'
             elif part=='basal':
-                cur_res = np.array(nm.get(name, neuron, neurite_type=nm.BASAL_DENDRITE)).mean()
+                cur_res = np.array(nm.get(name, neuron, neurite_type=nm.BASAL_DENDRITE))
+                cur_res = cur_res[filter_func(cur_res)].mean()
                 cur_key = 'mean_' + name + '(basal)'
             yield (cur_key, cur_res)
         def sholl_f(name, part='all'):
@@ -267,10 +271,10 @@ class morpho_parser:
         def f2(name):
             cur_res = nm.get(name, neuron)
             yield (name, cur_res)
-        def f1(name):
-            yield from f1_1(name)
-            yield from f1_1(name, 'apical')
-            yield from f1_1(name, 'basal')
+        def f1(name, filter_func=lambda x:True):
+            yield from f1_1(name, 'all', filter_func)
+            yield from f1_1(name, 'apical', filter_func)
+            yield from f1_1(name, 'basal', filter_func)
         def f3(name):
             cur_res0=np.array(nm.get(name, neuron))
             cur_res1=np.array(nm.get(name, neuron, neurite_type=nm.APICAL_DENDRITE))
@@ -292,7 +296,7 @@ class morpho_parser:
                 yield (key, res)
         neurom_metric = {'local_bifurcation_angles':f1,
                          'neurite_lengths': f5,
-                    'neurite_volume_density':f1,
+                    'neurite_volume_density': partial(f1, filter_func=lambda x:x<5),
                     'neurite_volumes': f5,
                     'number_of_bifurcations':f2,
                     'number_of_forking_points':f2,
@@ -357,7 +361,9 @@ def plot_multi_neuron(neurons, layout, to_save="", scalebar=(200,"$\mu m$"),fig_
     if fig_size is None:
         fig_size=(2*layout[0], 2*layout[1])
     fig, axs = plt.subplots(*layout, figsize=fig_size)
-    if layout[1]==1 and axs.ndim==1:
+    if layout == (1, 1):
+        axs = np.array([[axs]])
+    elif layout[1]==1 and axs.ndim==1:
         axs=axs[:,np.newaxis]
     elif layout[0]==1 and axs.ndim==1:
         axs=axs[np.newaxis,:]
@@ -443,7 +449,7 @@ def plot_sholl_demo(neuron, step_size=30, label_dict=None, to_save=""):
     ax.autoscale()
     ax.set_axis_off()
     plt.title(None)
-    if bool(to_save):
+    if to_save:
         to_save_figure(to_save)
 
 def plot_single_neuron(neuron, put_apical_upside=False, to_save=""):
@@ -459,5 +465,5 @@ def plot_single_neuron(neuron, put_apical_upside=False, to_save=""):
     ax.set_xlabel(None)
     ax.set_ylabel(None)
     ax.set_axis_off()
-    if bool(to_save):
+    if to_save:
         to_save_figure(to_save)

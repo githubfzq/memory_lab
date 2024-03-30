@@ -1,2 +1,4 @@
 [core]
     remote = onedrive
+['remote "onedrive"']
+    url = webdavs://alist.zuquan.xyz:18080/dav/onedrive/dvcData/

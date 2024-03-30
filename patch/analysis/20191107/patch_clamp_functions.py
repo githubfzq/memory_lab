@@ -19,6 +19,7 @@ from analysis_functions import (
     fillna_unique
 )
 from plot_helper import add_scalebar, get_aspect_scale, to_save_figure
+# from cache_util import cache
 
 
 class electro_base(object):

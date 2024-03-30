@@ -136,7 +136,7 @@ class cluster_processor(electro_parser, morpho_parser):
             to_save_figure(to_save)
 
     def plot_decomposition_scatter(
-        self, ca_dat=None, dim1=0, dim2=1, to_save="", plot_3d=False, fig_size=(3,3), show_legend=True,
+        self, ca_dat, clusters, dim1=0, dim2=1, to_save="", plot_3d=False, fig_size=(3,3), show_legend=True,
         label_map=None, colors=None,
     ):
         """Plot PCA scatter.
@@ -145,25 +145,26 @@ class cluster_processor(electro_parser, morpho_parser):
         label_map: dict. map cluster ID to label string. Default: {0: 'cluster 1', 1: 'cluster 2', ...}.
         colors: list. default to C1, C2, C3...
         """
-        if ca_dat is None:
-            ca_dat = self.k_means(return_filled=True, return_scaled=True)
-        X = ca_dat.to_numpy()[:, :-1]
-        pca = PCA(n_components=0.8)
-        newX = pca.fit_transform(X)
+        # if ca_dat is None:
+        #     ca_dat = self.k_means(return_filled=True, return_scaled=True)
+        # X = ca_dat.to_numpy()[:, :-1]
+        # pca = PCA(n_components=0.8)
+        # newX = pca.fit_transform(X)
         _color = ("C{}".format(i) for i in range(9))
         fig = plt.figure(figsize=fig_size)
+        clusters_unique = np.sort(np.unique(clusters))
         if label_map is None:
-            label_map={clust:'cluster {}'.format(clust + 1) for clust in np.sort(ca_dat.cluster.unique())}
+            label_map={clust:'cluster {}'.format(clust + 1) for clust in clusters_unique}
         if plot_3d:
             ax = fig.add_subplot(projection='3d')
             ax.view_init(30,30)
             dim1, dim2, dim3 = (0, 1, 2)
-            for clust in np.sort(ca_dat.cluster.unique()):
-                clust_row = ca_dat.cluster.values == clust
+            for clust in clusters_unique:
+                clust_row = clusters == clust
                 ax.scatter(
-                    newX[clust_row, 0],
-                    newX[clust_row, 1],
-                    newX[clust_row, 2],
+                    ca_dat[clust_row, 0],
+                    ca_dat[clust_row, 1],
+                    ca_dat[clust_row, 2],
                     color=next(_color),
                     label=label_map[clust],
                 )
@@ -177,11 +178,11 @@ class cluster_processor(electro_parser, morpho_parser):
             # plt.tight_layout()
         else:
             ax = fig.add_subplot(1, 1, 1)
-            for clust in np.sort(ca_dat.cluster.unique()):
-                clust_row = ca_dat.cluster.values == clust
+            for clust in clusters_unique:
+                clust_row = clusters == clust
                 ax.scatter(
-                    newX[clust_row, dim1],
-                    newX[clust_row, dim2],
+                    ca_dat[clust_row, dim1],
+                    ca_dat[clust_row, dim2],
                     color=next(_color),
                     label=label_map[clust],
                 )
