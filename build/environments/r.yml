@@ -1,0 +1,10 @@
+name: r
+channels:
+  - conda-forge
+dependencies:
+  - r-irkernel
+  - r-dplyr
+  - r-tidyr
+  - r-kernlab
+  - r-ggplot2
+prefix: /home/memory_fzq/.conda/envs/r
