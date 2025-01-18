@@ -6,3 +6,6 @@ for envfile in "$1/environment.*.yml"; do
     conda env create -f $envfile 
     conda run -n $envname python -m ipykernel install --prefix /opt/conda --name $envname --display-name "Python ($envname)" 
 done
+
+conda env create -f $1/r.yml
+conda run -n r R -e 'IRkernel::installspec(prefix="/opt/conda")'
