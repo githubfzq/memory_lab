@@ -1,0 +1,11 @@
+name: r
+channels:
+  - conda-forge
+dependencies:
+  - r-dplyr
+  - r-ggplot2
+  - r-irkernel
+  - r-kernlab
+  - r-readxl
+  - r-tidyr
+  - r-tidyverse
