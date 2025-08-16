@@ -4,7 +4,6 @@
 *.swc
 *.xlsx
 *.mat
-*.TIF
 *.bmp
 *.EVT
 *.txt
@@ -17,8 +16,6 @@
 *.spf
 *.pyc
 *.traces
-*.tif
-*.tiff
 *.jpg
 *.fig
 *.ims
